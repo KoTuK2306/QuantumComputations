@@ -4,21 +4,29 @@ class Program
 {
 	static void Main()
 	{
-		Console.WriteLine("Введите индексы множителей операторов Паули:");
-		string K = Console.ReadLine()!;
-		string L = Console.ReadLine()!;
-		string M = "", w = "";
-		Calculation.PauliMatrices(K, L, out M);
-		Calculation.Factors(K, L, out w);
-		Console.WriteLine("Sigma_" + K + "*Sigma_" + L + "=" + w + "*Sigma_" + M);
+		Console.WriteLine("Введите коэффициент первого слагаемого гамильтониана");
+		string a = Console.ReadLine()!;
+		Console.WriteLine("Введите индексы первого оператора Паули");
+		string sigma_1 = Console.ReadLine()!;
+		Console.WriteLine("Введите коэффициент второго слагаемого гамильтониана");
+		string b = Console.ReadLine()!;
+		Console.WriteLine("Введите индексы второго оператора Паули");
+		string sigma_2 = Console.ReadLine()!;
+		Console.WriteLine("Введите коэффициент третьего слагаемого гамильтониана");
+		string c = Console.ReadLine()!;
+		Console.WriteLine("Введите индексы третьего оператора Паули");
+		string sigma_3 = Console.ReadLine()!;
+		Console.WriteLine($"Введённый вами гамильтониан: {a} sigma_{sigma_1} + {b} sigma{sigma_2} + {c} sigma{sigma_3}");
+
+		Console.WriteLine(Hamiltonian.countingOperators(sigma_1, sigma_2, sigma_3));
 	}
 	class Calculation
 	{
-		public static void PauliMatrices(string K, string L, out string M)
+		public static string PauliMatrices(string K, string L)
 		{
 			char[] K1 = K.ToCharArray();
 			char[] L1 = L.ToCharArray();
-			M = "";
+			string M = "";
 			int a, b, c;
 			if (K1.Length == L1.Length)
 			{
@@ -29,10 +37,13 @@ class Program
 					c = Calculation.Operations(a, b);
 					M = M + Convert.ToString(c);
 				}
+				return M;
 			}
-			else Console.WriteLine("Ошибка размерности кубитов двух операторов");
-
-
+			else
+			{
+				Console.WriteLine("Ошибка размерности кубитов двух операторов");
+				return "";
+			};
 		}
 		public static int Operations(int a, int b)
 		{
@@ -43,12 +54,12 @@ class Program
 			else c = 6 / (a * b);
 			return c;
 		}
-		public static void Factors(string K, string L, out string w)
+		public static string Factors(string K, string L)
 		{
 			char[] K1 = K.ToCharArray();
 			char[] L1 = L.ToCharArray();
 			int a, b, skl, p = 0, m = 0;
-			w = "";
+			string w = "";
 			if (K1.Length == L1.Length)
 			{
 				for (int i = 0; i < K1.Length; i++)
@@ -72,7 +83,18 @@ class Program
 					else w = "-i";
 				}
 			}
+			return w;
+		}
+	}
+	class Hamiltonian
+	{
+		public static string countingOperators(string sigma_1, string sigma_2, string sigma_3)
+		{
+			string sigma_13 = Calculation.Factors(sigma_1, sigma_3) + "*Sigma_" + Calculation.PauliMatrices(sigma_1, sigma_3);
+			string sigma_12 = Calculation.Factors(sigma_1, sigma_2) + "*Sigma_" + Calculation.PauliMatrices(sigma_1, sigma_2);
+			string sigma_23 = Calculation.Factors(sigma_2, sigma_3) + "*Sigma_" + Calculation.PauliMatrices(sigma_2, sigma_3);
 
+			return $"sigma_AC = {sigma_13}, sigma_AB = {sigma_12}, sigma_BC = {sigma_23}";
 		}
 	}
 }
