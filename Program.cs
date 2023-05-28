@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 class Program
 {
+	static string sigma = "\u03C3";
 	static void Main()
 	{
+		Console.OutputEncoding = Encoding.UTF8;
 		Console.WriteLine("Введите коэффициент первого слагаемого гамильтониана");
 		string a = Console.ReadLine()!;
 		Console.WriteLine("Введите индексы первого оператора Паули");
@@ -16,7 +20,7 @@ class Program
 		string c = Console.ReadLine()!;
 		Console.WriteLine("Введите индексы третьего оператора Паули");
 		string sigma_3 = Console.ReadLine()!;
-		Console.WriteLine($"Введённый вами гамильтониан: {a} sigma_{sigma_1} + {b} sigma{sigma_2} + {c} sigma{sigma_3}");
+		Console.WriteLine($"Введённый вами гамильтониан: {a}*{sigma}_{sigma_1} + {b}*{sigma}{sigma_2} + {c}*{sigma}{sigma_3}");
 
 		Console.WriteLine(Hamiltonian.countingOperators(sigma_1, sigma_2, sigma_3));
 	}
@@ -90,11 +94,78 @@ class Program
 	{
 		public static string countingOperators(string sigma_1, string sigma_2, string sigma_3)
 		{
-			string sigma_13 = Calculation.Factors(sigma_1, sigma_3) + "*Sigma_" + Calculation.PauliMatrices(sigma_1, sigma_3);
-			string sigma_12 = Calculation.Factors(sigma_1, sigma_2) + "*Sigma_" + Calculation.PauliMatrices(sigma_1, sigma_2);
-			string sigma_23 = Calculation.Factors(sigma_2, sigma_3) + "*Sigma_" + Calculation.PauliMatrices(sigma_2, sigma_3);
+			string sigma_13 = Calculation.Factors(sigma_1, sigma_3) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_1, sigma_3);
+			string sigma_12 = Calculation.Factors(sigma_1, sigma_2) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_1, sigma_2);
+			string sigma_23 = Calculation.Factors(sigma_2, sigma_3) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_2, sigma_3);
+			string sigma_12_indexes = sigma_12.Split("_")[sigma_12.Split("_").Length - 1];
+			string sigma_123_draft = Calculation.Factors(sigma_12_indexes, sigma_3) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_12_indexes, sigma_3);
+			string sigma_123;
 
-			return $"sigma_AC = {sigma_13}, sigma_AB = {sigma_12}, sigma_BC = {sigma_23}";
+			Console.WriteLine($"sigma_12 = {sigma_12}");
+			Console.WriteLine($"sigma_123_draft = {sigma_123_draft}");
+
+			if (sigma_12.StartsWith("-1"))
+			{
+				if (sigma_123_draft.StartsWith("-i"))
+				{
+					sigma_123 = $"i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("i"))
+				{
+					sigma_123 = $"-i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("-1"))
+				{
+					sigma_123 = $"{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else
+				{
+					sigma_123 = $"-1*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+			}
+			else if (sigma_12.StartsWith("-i"))
+			{
+				if (sigma_123_draft.StartsWith("-i"))
+				{
+					sigma_123 = $"-1*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("i"))
+				{
+					sigma_123 = $"{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("-1"))
+				{
+					sigma_123 = $"i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else
+				{
+					sigma_123 = $"-i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+			}
+			else if (sigma_12.StartsWith("i"))
+			{
+				if (sigma_123_draft.StartsWith("-i"))
+				{
+					sigma_123 = $"{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("i"))
+				{
+					sigma_123 = $"-1*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("-1"))
+				{
+					sigma_123 = $"-i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else
+				{
+					sigma_123 = $"i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+			}
+			else 
+			{
+				sigma_123 = sigma_123_draft;
+			}
+			return $"{sigma}_AC = {sigma_13}, {sigma}_AB = {sigma_12}, {sigma}_BC = {sigma_23}, {sigma}_ABC = {sigma_123}";
 		}
 	}
 }
