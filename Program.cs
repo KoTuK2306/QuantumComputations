@@ -19,13 +19,10 @@ class Program
 		Console.Write("Введите индексы третьего оператора Паули: ");
 		string sigma_3 = Console.ReadLine()!;
 		Console.WriteLine($"Введённый вами гамильтониан: H = {a}*{sigma}_{sigma_1} + {b}*{sigma}_{sigma_2} + {c}*{sigma}_{sigma_3}");
-		string[] sigma_array = Hamiltonian.countingOperators(sigma_1, sigma_2, sigma_3);
+		string[] sigma_array = Hamiltonian.CountingOperators(sigma_1, sigma_2, sigma_3);
 
-		//sigma_12, sigma_23, sigma_123
-		Console.WriteLine($"{sigma}_AB = {sigma_array[0]}, {sigma}_BC = {sigma_array[1]}, {sigma}_ABC = {sigma_array[2]}");
-
-		Console.WriteLine($"H^2 = {Hamiltonian.calculateSecondDegreeOfHamiltonian(Convert.ToDouble(a), Convert.ToDouble(b), sigma_array)}");
-		Console.WriteLine($"H^3 = {Hamiltonian.calculateThirdDegreeOfHamiltonian(Convert.ToDouble(a), Convert.ToDouble(b), Convert.ToDouble(c), sigma_1, sigma_2,sigma_array)}");
+		Console.WriteLine($"H^2 = {Hamiltonian.CalculateSecondDegreeOfHamiltonian(Convert.ToDouble(a), Convert.ToDouble(b), sigma_array)}");
+		Console.WriteLine($"H^3 = {Hamiltonian.CalculateThirdDegreeOfHamiltonian(Convert.ToDouble(a), Convert.ToDouble(b), Convert.ToDouble(c), sigma_1, sigma_2,sigma_array)}");
 	}
 	class Calculation
 	{
@@ -95,7 +92,7 @@ class Program
 	}
 	class Hamiltonian
 	{
-		public static string[] countingOperators(string sigma_1, string sigma_2, string sigma_3)
+		public static string[] CountingOperators(string sigma_1, string sigma_2, string sigma_3)
 		{
 			string sigma_12 = Calculation.Factors(sigma_1, sigma_2) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_1, sigma_2);
 			string sigma_23 = Calculation.Factors(sigma_2, sigma_3) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_2, sigma_3);
@@ -168,13 +165,13 @@ class Program
 			return sigma_array;
 		}
 
-		public static string calculateSecondDegreeOfHamiltonian(double alpha, double beta, string[] arrayOfSigma)
+		public static string CalculateSecondDegreeOfHamiltonian(double alpha, double beta, string[] arrayOfSigma)
 		{
 			return $"{sigma}_000 + {2 * alpha* beta}*{arrayOfSigma[0]}";
 		}
-		public static string calculateThirdDegreeOfHamiltonian(double alpha, double beta, double gamma, string sigma_1, string sigma_2, string[] arrayOfSigma)
+		public static string CalculateThirdDegreeOfHamiltonian(double alpha, double beta, double gamma, string sigma_1, string sigma_2, string[] arrayOfSigma)
 		{
-			return $"H + {2 * alpha * Math.Pow(beta, 2)}*{sigma_1}+{2 * Math.Pow(beta, 2) * beta}*{sigma_2} + {2 * alpha * beta * gamma}*{arrayOfSigma[2]}";
+			return $"H + {2 * alpha * Math.Pow(beta, 2)}*{sigma}_{sigma_1}+{2 * Math.Pow(beta, 2) * beta}*{sigma}_{sigma_2} + {2 * alpha * beta * gamma}*{arrayOfSigma[2]}";
 		}
 	}
 }
