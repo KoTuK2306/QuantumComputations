@@ -1,24 +1,28 @@
-﻿using System;
+﻿using System.Text;
 
 class Program
 {
+	static string sigma = "\u03C3";
 	static void Main()
 	{
-		Console.WriteLine("Введите коэффициент первого слагаемого гамильтониана");
+		Console.OutputEncoding = Encoding.UTF8;
+		Console.Write("Введите коэффициент первого слагаемого гамильтониана: ");
 		string a = Console.ReadLine()!;
-		Console.WriteLine("Введите индексы первого оператора Паули");
+		Console.Write("Введите индексы первого оператора Паули: ");
 		string sigma_1 = Console.ReadLine()!;
-		Console.WriteLine("Введите коэффициент второго слагаемого гамильтониана");
+		Console.Write("Введите коэффициент второго слагаемого гамильтониана: ");
 		string b = Console.ReadLine()!;
-		Console.WriteLine("Введите индексы второго оператора Паули");
+		Console.Write("Введите индексы второго оператора Паули: ");
 		string sigma_2 = Console.ReadLine()!;
-		Console.WriteLine("Введите коэффициент третьего слагаемого гамильтониана");
+		Console.Write("Введите коэффициент третьего слагаемого гамильтониана: ");
 		string c = Console.ReadLine()!;
-		Console.WriteLine("Введите индексы третьего оператора Паули");
+		Console.Write("Введите индексы третьего оператора Паули: ");
 		string sigma_3 = Console.ReadLine()!;
-		Console.WriteLine($"Введённый вами гамильтониан: {a} sigma_{sigma_1} + {b} sigma{sigma_2} + {c} sigma{sigma_3}");
+		Console.WriteLine($"Введённый вами гамильтониан: H = {a}*{sigma}_{sigma_1} + {b}*{sigma}_{sigma_2} + {c}*{sigma}_{sigma_3}");
+		string[] sigma_array = Hamiltonian.CountingOperators(sigma_1, sigma_2, sigma_3);
 
-		Console.WriteLine(Hamiltonian.countingOperators(sigma_1, sigma_2, sigma_3));
+		Console.WriteLine($"H^2 = {Hamiltonian.CalculateSecondDegreeOfHamiltonian(Convert.ToDouble(a), Convert.ToDouble(b), sigma_array)}");
+		Console.WriteLine($"H^3 = {Hamiltonian.CalculateThirdDegreeOfHamiltonian(Convert.ToDouble(a), Convert.ToDouble(b), Convert.ToDouble(c), sigma_1, sigma_2,sigma_array)}");
 	}
 	class Calculation
 	{
@@ -88,13 +92,86 @@ class Program
 	}
 	class Hamiltonian
 	{
-		public static string countingOperators(string sigma_1, string sigma_2, string sigma_3)
+		public static string[] CountingOperators(string sigma_1, string sigma_2, string sigma_3)
 		{
-			string sigma_13 = Calculation.Factors(sigma_1, sigma_3) + "*Sigma_" + Calculation.PauliMatrices(sigma_1, sigma_3);
-			string sigma_12 = Calculation.Factors(sigma_1, sigma_2) + "*Sigma_" + Calculation.PauliMatrices(sigma_1, sigma_2);
-			string sigma_23 = Calculation.Factors(sigma_2, sigma_3) + "*Sigma_" + Calculation.PauliMatrices(sigma_2, sigma_3);
+			string sigma_12 = Calculation.Factors(sigma_1, sigma_2) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_1, sigma_2);
+			string sigma_23 = Calculation.Factors(sigma_2, sigma_3) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_2, sigma_3);
+			string sigma_12_indexes = sigma_12.Split("_")[sigma_12.Split("_").Length - 1];
+			string sigma_123_draft = Calculation.Factors(sigma_12_indexes, sigma_3) + $"*{sigma}_" + Calculation.PauliMatrices(sigma_12_indexes, sigma_3);
+			string sigma_123;
 
-			return $"sigma_AC = {sigma_13}, sigma_AB = {sigma_12}, sigma_BC = {sigma_23}";
+			if (sigma_12.StartsWith("-1"))
+			{
+				if (sigma_123_draft.StartsWith("-i"))
+				{
+					sigma_123 = $"i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("i"))
+				{
+					sigma_123 = $"-i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("-1"))
+				{
+					sigma_123 = $"{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else
+				{
+					sigma_123 = $"-1*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+			}
+			else if (sigma_12.StartsWith("-i"))
+			{
+				if (sigma_123_draft.StartsWith("-i"))
+				{
+					sigma_123 = $"-1*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("i"))
+				{
+					sigma_123 = $"{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("-1"))
+				{
+					sigma_123 = $"i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else
+				{
+					sigma_123 = $"-i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+			}
+			else if (sigma_12.StartsWith("i"))
+			{
+				if (sigma_123_draft.StartsWith("-i"))
+				{
+					sigma_123 = $"{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("i"))
+				{
+					sigma_123 = $"-1*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else if (sigma_123_draft.StartsWith("-1"))
+				{
+					sigma_123 = $"-i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+				else
+				{
+					sigma_123 = $"i*{sigma}_{sigma_123_draft.Split("_")[sigma_123_draft.Split("_").Length - 1]}";
+				}
+			}
+			else 
+			{
+				sigma_123 = sigma_123_draft;
+			}
+			string[] sigma_array = new string[] { sigma_12, sigma_23, sigma_123 };
+			return sigma_array;
+		}
+
+		public static string CalculateSecondDegreeOfHamiltonian(double alpha, double beta, string[] arrayOfSigma)
+		{
+			return $"{sigma}_000 + {2 * alpha* beta}*{arrayOfSigma[0]}";
+		}
+		public static string CalculateThirdDegreeOfHamiltonian(double alpha, double beta, double gamma, string sigma_1, string sigma_2, string[] arrayOfSigma)
+		{
+			return $"H + {2 * alpha * Math.Pow(beta, 2)}*{sigma}_{sigma_1}+{2 * Math.Pow(beta, 2) * beta}*{sigma}_{sigma_2} + {2 * alpha * beta * gamma}*{arrayOfSigma[2]}";
 		}
 	}
 }
